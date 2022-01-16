@@ -45,6 +45,8 @@ public class GOLCell : MonoBehaviour
         SetIsAlive(false);
     }
 
+    private bool pausedByDraw = false;
+
     public void SetIsAlive(bool alive)
     {
         IsAlive = alive;
@@ -73,8 +75,12 @@ public class GOLCell : MonoBehaviour
         {
             if (!IsAlive)
             {
+                if (GOLCellGrid.main.DrawingPausesIsOn) {
+                    GOLCellGrid.main.PauseGame();
+                }
                 SetIsAlive(true);
                 MetaballRenderer.main.RenderMetaballs();
+                pausedByDraw = true;
                 return;
             }
         }
@@ -82,9 +88,15 @@ public class GOLCell : MonoBehaviour
         {
             if (IsAlive)
             {
+                if (GOLCellGrid.main.DrawingPausesIsOn) {
+                    GOLCellGrid.main.PauseGame();
+                }
                 SetIsAlive(false);
                 MetaballRenderer.main.RenderMetaballs();
             }
+        }
+        if (GOLCellGrid.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
+            GOLCellGrid.main.ResumeGame();
         }
         if (!highlighted)
         {
@@ -97,6 +109,9 @@ public class GOLCell : MonoBehaviour
         if (highlighted)
         {
             Unhighlight();
+        }
+        if (GOLCellGrid.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
+            GOLCellGrid.main.ResumeGame();
         }
     }
 

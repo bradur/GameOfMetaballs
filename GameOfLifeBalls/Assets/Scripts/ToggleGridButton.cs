@@ -27,7 +27,7 @@ public class ToggleGridButton : MonoBehaviour
 
     public void UpdateButton()
     {
-        txtTitle.text = GOLCellGrid.main.GridIsOn ? "Hide grid" : "Show grid";
+        txtTitle.text = GOLCellGrid.main.GridIsOn ? "Grid: <color=green>ON</color>" : "Grid: <color=red>OFF</color>";
         imgBg.color = GOLCellGrid.main.GridIsOn ? isOnColor : isOffColor;
     }
 }

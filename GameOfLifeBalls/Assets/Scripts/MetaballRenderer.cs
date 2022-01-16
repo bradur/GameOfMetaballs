@@ -62,7 +62,6 @@ public class MetaballRenderer : MonoBehaviour
             Vector4 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
             Vector4 pos = new Vector4(invPosition.x, invPosition.y, GOLCellGrid.main.MetaballRadius, 0);
             metaBallData[index] = pos;
-            Debug.Log(pos);
             index += 1;
         }
 
@@ -74,7 +73,6 @@ public class MetaballRenderer : MonoBehaviour
         Vector4[] metaBallData = GetMetaBallData();
 
         metaballMaterial.SetInt("_NumberOfMetaBalls", metaBallData.Length);
-        Debug.Log(metaballMaterial.GetInt("_NumberOfMetaBalls"));
         metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
     }
 
@@ -85,7 +83,6 @@ public class MetaballRenderer : MonoBehaviour
 
         float height = orthographicSize * 2f;
         float width = height * aspectRatio;
-        Debug.Log(height);
         Mesh mesh = new Mesh();
 
         Vector3[] verts = new Vector3[]{

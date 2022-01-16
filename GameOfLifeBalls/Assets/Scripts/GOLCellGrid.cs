@@ -37,7 +37,10 @@ public class GOLCellGrid : MonoBehaviour
     public bool GameIsOn { get { return gameIsOn; } }
     public bool GridIsOn { get; private set; }
     public bool SquaresAreVisible { get; private set; }
+    private bool gameIsPaused = false;
 
+    private bool drawingPausesIsOn = true;
+    public bool DrawingPausesIsOn { get { return drawingPausesIsOn; } }
     private float updateInterval = 1f;
 
     private float scale = 2.0f;
@@ -45,6 +48,7 @@ public class GOLCellGrid : MonoBehaviour
     private float updateTimer = 0f;
 
     public float MetaballRadius { get; private set; }
+
 
     void Start()
     {
@@ -76,10 +80,22 @@ public class GOLCellGrid : MonoBehaviour
             cell.ToggleSquares();
         }
     }
+    public void ToggleDrawingPause()
+    {
+        drawingPausesIsOn = !drawingPausesIsOn;
+    }
 
     public void ToggleGame()
     {
         gameIsOn = !gameIsOn;
+    }
+    public void PauseGame()
+    {
+        gameIsPaused = true;
+    }
+    public void ResumeGame()
+    {
+        gameIsPaused = false;
     }
 
     public void SetSpeed(int milliseconds)
@@ -96,7 +112,7 @@ public class GOLCellGrid : MonoBehaviour
 
     void Update()
     {
-        if (gameIsOn)
+        if (gameIsOn && !gameIsPaused)
         {
             updateTimer += Time.deltaTime;
             if (updateTimer >= updateInterval)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ToggleSquareButton : MonoBehaviour
+public class TogglePauseButton : MonoBehaviour
 {
     [SerializeField]
     private Color isOnColor;
@@ -14,20 +14,25 @@ public class ToggleSquareButton : MonoBehaviour
     [SerializeField]
     private Image imgBg;
 
-    private void Start()
+    public static TogglePauseButton main;
+    private void Awake() {
+        main = this;
+    }
+
+    void Start()
     {
         UpdateButton();
     }
 
     public void Toggle()
     {
-        GOLCellGrid.main.ToggleSquares();
+        GOLCellGrid.main.ToggleDrawingPause();
         UpdateButton();
     }
 
     public void UpdateButton()
     {
-        txtTitle.text = GOLCellGrid.main.SquaresAreVisible ? "Squares: <color=green>ON</color>" : "Squares: <color=red>OFF</color>";
-        imgBg.color = GOLCellGrid.main.SquaresAreVisible ? isOnColor : isOffColor;
+        txtTitle.text = GOLCellGrid.main.DrawingPausesIsOn ? "Pause on click: <color=green>ON</color>" : "Pause on click: <color=red>OFF</color>";
+        imgBg.color = GOLCellGrid.main.DrawingPausesIsOn ? isOnColor : isOffColor;
     }
 }
