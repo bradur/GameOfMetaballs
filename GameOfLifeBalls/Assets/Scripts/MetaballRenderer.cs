@@ -20,8 +20,9 @@ public class MetaballRenderer : MonoBehaviour
 
     private int maxMetaBalls = 1000;
 
+    public float MetaballRadius { get; private set; }
 
-    void Start()
+    public void Initialize()
     {
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter = GetComponent<MeshFilter>();
@@ -39,20 +40,26 @@ public class MetaballRenderer : MonoBehaviour
 
     public void RenderMetaballs()
     {
-        if (cells == null) {
+        if (cells == null)
+        {
             return;
         }
         Calculate();
-        if (metaballMaterial.color != GOLCellGrid.main.BallColor) {
+        if (metaballMaterial.color != GOLCellGrid.main.BallColor)
+        {
             metaballMaterial.color = GOLCellGrid.main.BallColor;
         }
     }
 
+    public void SetMetaballRadius(float radius)
+    {
+        MetaballRadius = radius;
+        RenderMetaballs();
+    }
+
     private Vector4[] GetMetaBallData()
     {
-        Vector4[] metaBallData = new Vector4[maxMetaBalls];
-
-        int index = 0;
+        List<Vector4> metaBallData = new List<Vector4>();
         foreach (GOLCell cell in cells)
         {
             if (!cell.IsAlive)
@@ -60,20 +67,21 @@ public class MetaballRenderer : MonoBehaviour
                 continue;
             }
             Vector4 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
-            Vector4 pos = new Vector4(invPosition.x, invPosition.y, GOLCellGrid.main.MetaballRadius, 0);
-            metaBallData[index] = pos;
-            index += 1;
+            Vector4 pos = new Vector4(invPosition.x, invPosition.y, MetaballRadius, 0);
+            metaBallData.Add(pos);
         }
 
-        return metaBallData;
+        return metaBallData.ToArray();
     }
 
     private void Calculate()
     {
         Vector4[] metaBallData = GetMetaBallData();
-
         metaballMaterial.SetInt("_NumberOfMetaBalls", metaBallData.Length);
-        metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
+        if (metaBallData.Length > 0) {
+            metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
+        }
+        metaballMaterial.SetFloat("_MetaballRadius", MetaballRadius * GOLCellGrid.main.Scale);
     }
 
     private void CreateQuadToCameraSize()
@@ -86,11 +94,11 @@ public class MetaballRenderer : MonoBehaviour
         Mesh mesh = new Mesh();
 
         Vector3[] verts = new Vector3[]{
-                new Vector3(0f, 0f),
-                new Vector3(0f, height),
-                new Vector3(height, height),
-                new Vector3(height, 0f)
-            };
+            new Vector3(0f, 0f),
+            new Vector3(0f, width),
+            new Vector3(width, width),
+            new Vector3(width, 0f)
+        };
 
         int[] tris = new int[]{
             0, 1, 2,
@@ -99,9 +107,9 @@ public class MetaballRenderer : MonoBehaviour
 
         Vector2[] uvs = new Vector2[]{
             new Vector2(0f, 0f),
-            new Vector2(0f, height),
-            new Vector2(height, height),
-            new Vector2(height, 0f)
+            new Vector2(0f, width),
+            new Vector2(width, width),
+            new Vector2(width, 0f)
         };
 
         mesh.vertices = verts;
@@ -109,6 +117,6 @@ public class MetaballRenderer : MonoBehaviour
         mesh.uv = uvs;
 
         meshFilter.mesh = mesh;
-        transform.position = new Vector3(transform.position.x, -orthographicSize, transform.position.z);
+        transform.position = new Vector3(-width / 2, -width / 2, transform.position.z);
     }
 }

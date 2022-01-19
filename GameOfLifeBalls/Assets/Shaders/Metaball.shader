@@ -19,7 +19,7 @@ Shader "Custom/Metaball"
         Cull Off
         Lighting Off
         ZWrite Off
-        Blend One OneMinusSrcAlpha
+        Blend SrcAlpha OneMinusSrcAlpha
         
         Pass
         {
@@ -54,6 +54,7 @@ Shader "Custom/Metaball"
 
             int _MetaballCount = 2;
             int _NumberOfMetaBalls;
+            float _MetaballRadius;
             float3 _MetaballData[1000];
 
             fixed4 frag (v2f i) : SV_Target
@@ -64,13 +65,23 @@ Shader "Custom/Metaball"
 
                 for (int m = 0; m < _NumberOfMetaBalls; ++m)
                 {
-                    mx += pow(_MetaballData[m].z, 2) / (pow(i.uv.x - _MetaballData[m].x, 2) + pow(i.uv.y - _MetaballData[m].y, 2));
+                    mx += pow(_MetaballRadius, 2) / (pow(i.uv.x - _MetaballData[m].x, 2) + pow(i.uv.y - _MetaballData[m].y, 2));
                 }
 
-                if (mx > 1)
-                return _Color;
-                else 
-                return fixed4(0, 0, 0, 0);
+                if (mx > 1) {
+                    return _Color;
+                    float first = mx;
+                    return fixed4(
+                        _Color.r + first,
+                        _Color.g + first,
+                        _Color.b + first,
+                        _Color.a
+                    );
+                    //return fixed4(first, 0, 0, first);
+                }
+                else  {
+                    return fixed4(0, 0, 0, 0);
+                }
             }
 
 

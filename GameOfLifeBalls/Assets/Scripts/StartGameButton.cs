@@ -16,12 +16,19 @@ public class StartGameButton : MonoBehaviour
 
 
     void Start() {
-        Toggle();
+        UpdateButton();
     }
 
-    public void Toggle() {
-
-        txtTitle.text = GOLCellGrid.main.GameIsOn ? "Pause game" : "Start game";
-        imgBg.color = GOLCellGrid.main.GameIsOn ? isOnColor : isOffColor;
+    public void Toggle()
+    {
+        GameOfLife.main.ToggleGame();
+        UpdateButton();
     }
+
+    public void UpdateButton() {
+
+        txtTitle.text = GameOfLife.main.GameIsOn ? "Pause game" : "Start game";
+        imgBg.color = GameOfLife.main.GameIsOn ? isOnColor : isOffColor;
+    }
+
 }

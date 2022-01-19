@@ -12,6 +12,6 @@ public class UISpeedSlider : MonoBehaviour
         UpdateSpeed();
     }
     public void UpdateSpeed() {
-        GOLCellGrid.main.SetSpeed((int)(slider.maxValue - slider.value));
+        GameOfLife.main.SetSpeed(slider.value);
     }
 }

@@ -35,7 +35,8 @@ public class GOLCell : MonoBehaviour
     public void Initialize(Transform parent, Vector2Int pos, float scale)
     {
         transform.SetParent(parent);
-        transform.localPosition = new Vector2(pos.x / scale, pos.y / scale);
+        transform.localPosition = new Vector2(pos.x * scale, pos.y * scale);
+        transform.localScale = new Vector2(transform.localScale.x * scale, transform.localScale.y * scale);
         Position = pos;
         mainSprite = GetComponent<SpriteRenderer>();
         circleCollider2D = GetComponent<CircleCollider2D>();
@@ -75,8 +76,8 @@ public class GOLCell : MonoBehaviour
         {
             if (!IsAlive)
             {
-                if (GOLCellGrid.main.DrawingPausesIsOn) {
-                    GOLCellGrid.main.PauseGame();
+                if (GameOfLife.main.DrawingPausesIsOn) {
+                    GameOfLife.main.PauseGame();
                 }
                 SetIsAlive(true);
                 MetaballRenderer.main.RenderMetaballs();
@@ -88,15 +89,15 @@ public class GOLCell : MonoBehaviour
         {
             if (IsAlive)
             {
-                if (GOLCellGrid.main.DrawingPausesIsOn) {
-                    GOLCellGrid.main.PauseGame();
+                if (GameOfLife.main.DrawingPausesIsOn) {
+                    GameOfLife.main.PauseGame();
                 }
                 SetIsAlive(false);
                 MetaballRenderer.main.RenderMetaballs();
             }
         }
-        if (GOLCellGrid.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
-            GOLCellGrid.main.ResumeGame();
+        if (GameOfLife.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
+            GameOfLife.main.ResumeGame();
         }
         if (!highlighted)
         {
@@ -110,8 +111,8 @@ public class GOLCell : MonoBehaviour
         {
             Unhighlight();
         }
-        if (GOLCellGrid.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
-            GOLCellGrid.main.ResumeGame();
+        if (GameOfLife.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
+            GameOfLife.main.ResumeGame();
         }
     }
 

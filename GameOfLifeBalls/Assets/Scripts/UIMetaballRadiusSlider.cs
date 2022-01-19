@@ -11,6 +11,6 @@ public class UIMetaballRadiusSlider : MonoBehaviour
         UpdateRadius();
     }
     public void UpdateRadius() {
-        GOLCellGrid.main.SetMetaballRadius(slider.value);
+        MetaballRenderer.main.SetMetaballRadius(slider.value);
     }
 }

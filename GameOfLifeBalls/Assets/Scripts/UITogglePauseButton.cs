@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ToggleGridButton : MonoBehaviour
+public class UITogglePauseButton : MonoBehaviour
 {
     [SerializeField]
     private Color isOnColor;
@@ -14,6 +14,11 @@ public class ToggleGridButton : MonoBehaviour
     [SerializeField]
     private Image imgBg;
 
+    public static UITogglePauseButton main;
+    private void Awake() {
+        main = this;
+    }
+
     void Start()
     {
         UpdateButton();
@@ -21,13 +26,13 @@ public class ToggleGridButton : MonoBehaviour
 
     public void Toggle()
     {
-        GOLCellGrid.main.ToggleGrid();
+        GameOfLife.main.ToggleDrawingPause();
         UpdateButton();
     }
 
     public void UpdateButton()
     {
-        txtTitle.text = GOLCellGrid.main.GridIsOn ? "Grid: <color=green>ON</color>" : "Grid: <color=red>OFF</color>";
-        imgBg.color = GOLCellGrid.main.GridIsOn ? isOnColor : isOffColor;
+        txtTitle.text = GameOfLife.main.DrawingPausesIsOn ? "Pause on click: <color=green>ON</color>" : "Pause on click: <color=red>OFF</color>";
+        imgBg.color = GameOfLife.main.DrawingPausesIsOn ? isOnColor : isOffColor;
     }
 }

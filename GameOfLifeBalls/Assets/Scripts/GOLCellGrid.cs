@@ -15,10 +15,16 @@ public class GOLCellGrid : MonoBehaviour
     [SerializeField]
     private GOLCell golCellPrefab;
 
+    private int size = 100;
+
+    public int Size { get { return size; } }
+
     [SerializeField]
-    private Vector2Int size = new Vector2Int(100, 100);
+    private float sizeInWorld = 10;
 
     private GOLCell[,] cells;
+
+    public GOLCell[,] Cells { get { return cells; } }
 
     [SerializeField]
     private Color squareColor;
@@ -33,27 +39,89 @@ public class GOLCellGrid : MonoBehaviour
     private Color gridColor;
     public Color GridColor { get { return gridColor; } }
 
-    private bool gameIsOn = false;
-    public bool GameIsOn { get { return gameIsOn; } }
-    public bool GridIsOn { get; private set; }
     public bool SquaresAreVisible { get; private set; }
-    private bool gameIsPaused = false;
 
-    private bool drawingPausesIsOn = true;
-    public bool DrawingPausesIsOn { get { return drawingPausesIsOn; } }
-    private float updateInterval = 1f;
+    private float scale = 1f;
 
-    private float scale = 2.0f;
+    public float Scale { get { return scale; } }
 
-    private float updateTimer = 0f;
-
-    public float MetaballRadius { get; private set; }
-
+    public bool GridIsOn { get; private set; }
 
     void Start()
     {
-        Initialize();
-        InitializeMetaballRenderer();
+
+    }
+
+    public void Initialize(int size)
+    {
+        this.size = size;
+        cells = new GOLCell[size, size];
+        scale = sizeInWorld / size;
+        transform.position = new Vector3(-sizeInWorld / 2 + scale / 2, -sizeInWorld / 2 + scale / 2, 0f);
+        foreach(Transform child in transform) {
+            Destroy(child.gameObject);
+        }
+        for (int indexX = 0; indexX < size; indexX += 1)
+        {
+            for (int indexY = 0; indexY < size; indexY += 1)
+            {
+                GOLCell cell = Instantiate(golCellPrefab);
+                cell.Initialize(transform, new Vector2Int(indexX, indexY), scale);
+                cells[indexX, indexY] = cell;
+            }
+        }
+    }
+
+    public void Clear()
+    {
+        foreach (GOLCell cell in cells)
+        {
+            cell.SetIsAlive(false);
+        }
+    }
+
+    public void LoadPattern(string pattern)
+    {
+        RLEPattern rlePattern = new RLEPattern(pattern);
+
+        int bufferZoneSize = 10;
+        int patternSize = System.Math.Max(rlePattern.Height, rlePattern.Width);
+        Initialize(patternSize + bufferZoneSize * 2);
+
+        Debug.Log($"Pattern Loaded: \n${rlePattern}");
+
+        int originalXPos = bufferZoneSize;
+        int originalYPos = size - bufferZoneSize;
+        if (rlePattern.Height > rlePattern.Width)
+        {
+            originalXPos += patternSize / 2 - rlePattern.Width / 2;
+        }
+        else if (rlePattern.Width > rlePattern.Height)
+        {
+            originalYPos = originalYPos;
+        }
+        int xPos = originalXPos;
+        int yPos = originalYPos;
+        foreach (RLEPart part in rlePattern.Parts)
+        {
+            for (int tagIndex = 0; tagIndex < part.RunCount; tagIndex += 1)
+            {
+                if (part.Tag == RLETag.AliveCell)
+                {
+                    cells[xPos, yPos].SetIsAlive(true);
+                    xPos += 1;
+                }
+                else if (part.Tag == RLETag.DeadCell)
+                {
+                    xPos += 1;
+                }
+                else if (part.Tag == RLETag.NewLine)
+                {
+                    yPos -= 1;
+                    xPos = originalXPos;
+                }
+            }
+        }
     }
 
     public void ToggleGrid()
@@ -80,116 +148,8 @@ public class GOLCellGrid : MonoBehaviour
             cell.ToggleSquares();
         }
     }
-    public void ToggleDrawingPause()
-    {
-        drawingPausesIsOn = !drawingPausesIsOn;
-    }
 
-    public void ToggleGame()
-    {
-        gameIsOn = !gameIsOn;
-    }
-    public void PauseGame()
-    {
-        gameIsPaused = true;
-    }
-    public void ResumeGame()
-    {
-        gameIsPaused = false;
-    }
-
-    public void SetSpeed(int milliseconds)
-    {
-        updateInterval = milliseconds / 1000.0f;
-        Debug.Log($"Speed set at {updateInterval}");
-    }
-
-    public void SetMetaballRadius(float radius)
-    {
-        MetaballRadius = radius;
-        MetaballRenderer.main.RenderMetaballs();
-    }
-
-    void Update()
-    {
-        if (gameIsOn && !gameIsPaused)
-        {
-            updateTimer += Time.deltaTime;
-            if (updateTimer >= updateInterval)
-            {
-                UpdateCells();
-                MetaballRenderer.main.RenderMetaballs();
-                updateTimer = 0f;
-            }
-        }
-    }
-
-    private void InitializeMetaballRenderer()
-    {
-        List<GOLCell> cellList = new List<GOLCell>();
-        foreach (GOLCell cell in cells)
-        {
-            cellList.Add(cell);
-        }
-
-        MetaballRenderer.main.SetCells(cellList);
-    }
-
-    private void Initialize()
-    {
-        cells = new GOLCell[size.x, size.y];
-        for (int indexX = 0; indexX < size.x; indexX += 1)
-        {
-            for (int indexY = 0; indexY < size.y; indexY += 1)
-            {
-                GOLCell cell = Instantiate(golCellPrefab);
-                cell.Initialize(transform, new Vector2Int(indexX, indexY), scale);
-                cells[indexX, indexY] = cell;
-            }
-        }
-    }
-
-    private void UpdateCells()
-    {
-        for (int indexX = 0; indexX < size.x; indexX += 1)
-        {
-            for (int indexY = 0; indexY < size.y; indexY += 1)
-            {
-                GOLCell cell = cells[indexX, indexY];
-                int livingNeighborCount = GetLivingNeighborCount(cell);
-
-                bool cellAlive = DetermineRuleResult(livingNeighborCount, cell.IsAlive);
-                cell.NextState = cellAlive;
-            }
-        }
-        foreach (GOLCell cell in cells)
-        {
-            cell.SetIsAlive(cell.NextState);
-        }
-    }
-
-    private bool DetermineRuleResult(int livingNeighborCount, bool cellIsAlive)
-    {
-        if (cellIsAlive && livingNeighborCount < 2)
-        {
-            return false;
-        }
-        if (cellIsAlive && (livingNeighborCount == 2 || livingNeighborCount == 3))
-        {
-            return true;
-        }
-        if (cellIsAlive && livingNeighborCount > 3)
-        {
-            return false;
-        }
-        if (!cellIsAlive && livingNeighborCount == 3)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private int GetLivingNeighborCount(GOLCell cell)
+    public int GetLivingNeighborCount(GOLCell cell)
     {
         int livingNeighborCount = 0;
 
@@ -220,7 +180,7 @@ public class GOLCellGrid : MonoBehaviour
         int xPos = position.x + xCoordinate;
         int yPos = position.y + yCoordinate;
 
-        if (xPos < 0 || xPos >= size.x || yPos < 0 || yPos >= size.y)
+        if (xPos < 0 || xPos >= size || yPos < 0 || yPos >= size)
         {
             return null;
         }

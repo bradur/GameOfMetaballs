@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ToggleSquareButton : MonoBehaviour
+public class UIToggleSquareButton : MonoBehaviour
 {
     [SerializeField]
     private Color isOnColor;
