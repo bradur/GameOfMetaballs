@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UIMetaballRadiusSlider : MonoBehaviour
 {
+
+
     [SerializeField]
     Slider slider;
     void Start() {
@@ -13,4 +15,5 @@ public class UIMetaballRadiusSlider : MonoBehaviour
     public void UpdateRadius() {
         MetaballRenderer.main.SetMetaballRadius(slider.value);
     }
+
 }

@@ -22,6 +22,8 @@ public class MetaballRenderer : MonoBehaviour
 
     public float MetaballRadius { get; private set; }
 
+    private bool initialized = false;
+
     public void Initialize()
     {
         meshRenderer = GetComponent<MeshRenderer>();
@@ -31,6 +33,7 @@ public class MetaballRenderer : MonoBehaviour
         metaballMaterial.SetVectorArray("_MetaballData", new Vector4[maxMetaBalls]);
         metaballMaterial.SetInt("_NumberOfMetaBalls", 0);
         CreateQuadToCameraSize();
+        initialized = true;
     }
 
     public void SetCells(List<GOLCell> newCells)
@@ -40,6 +43,9 @@ public class MetaballRenderer : MonoBehaviour
 
     public void RenderMetaballs()
     {
+        if (!initialized) {
+            Initialize();
+        }
         if (cells == null)
         {
             return;

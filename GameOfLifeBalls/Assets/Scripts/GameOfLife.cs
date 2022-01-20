@@ -25,24 +25,24 @@ public class GameOfLife : MonoBehaviour
     private bool drawingPausesIsOn = true;
     public bool DrawingPausesIsOn { get { return drawingPausesIsOn; } }
 
-    [SerializeField]
-    private int size = 20;
 
-    [TextArea(5, 50)]
-    [SerializeField]
-    private string rleString = "";
-
-    void Start() {
-        Initialize();
-    }
-    public void Initialize() {
-        MetaballRenderer.main.Initialize();
+    public void DrawArea(int size) {
         grid.Initialize(size);
-        grid.LoadPattern(rleString);
         InitializeMetaballRenderer();
         MetaballRenderer.main.RenderMetaballs();
     }
 
+    public void LoadPattern(string rlePattern) {
+        if (rlePattern == "") {
+            return;
+        }
+        bool success = grid.LoadPattern(rlePattern);
+        if (!success) {
+            return;
+        }
+        InitializeMetaballRenderer();
+        MetaballRenderer.main.RenderMetaballs();
+    }
     
     void Update()
     {

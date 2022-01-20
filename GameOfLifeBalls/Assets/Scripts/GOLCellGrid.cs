@@ -47,13 +47,15 @@ public class GOLCellGrid : MonoBehaviour
 
     public bool GridIsOn { get; private set; }
 
-    void Start()
-    {
+    int MAX_SIZE = 256;
 
-    }
 
     public void Initialize(int size)
     {
+        if (size > MAX_SIZE) {
+            Debug.Log("Area is too big to handle!");
+            return;
+        }
         this.size = size;
         cells = new GOLCell[size, size];
         scale = sizeInWorld / size;
@@ -80,13 +82,19 @@ public class GOLCellGrid : MonoBehaviour
         }
     }
 
-    public void LoadPattern(string pattern)
+    public bool LoadPattern(string pattern)
     {
         RLEPattern rlePattern = new RLEPattern(pattern);
 
         int bufferZoneSize = 10;
         int patternSize = System.Math.Max(rlePattern.Height, rlePattern.Width);
-        Initialize(patternSize + bufferZoneSize * 2);
+        int requiredSize = patternSize + bufferZoneSize * 2;
+        if (requiredSize > MAX_SIZE) {
+            Debug.Log("Pattern is too big!");
+            return false;
+        }
+        Initialize(requiredSize);
+        UIResetAreaButton.main.SetSliderValue(size);
 
         Debug.Log($"Pattern Loaded: \n${rlePattern}");
 
@@ -98,8 +106,10 @@ public class GOLCellGrid : MonoBehaviour
         }
         else if (rlePattern.Width > rlePattern.Height)
         {
-            originalYPos = originalYPos;
+            originalYPos -= patternSize / 2 - rlePattern.Height / 2;
+            Debug.Log(originalYPos);
         }
+
         int xPos = originalXPos;
         int yPos = originalYPos;
         foreach (RLEPart part in rlePattern.Parts)
@@ -122,6 +132,7 @@ public class GOLCellGrid : MonoBehaviour
                 }
             }
         }
+        return true;
     }
 
     public void ToggleGrid()

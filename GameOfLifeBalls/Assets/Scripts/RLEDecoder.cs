@@ -23,7 +23,7 @@ public class RLEPattern
         this.rleString = rleString;
 
         string[] lines = rleString.Split(
-            new string[] { System.Environment.NewLine },
+            new string[] { "\r\n", "\r", "\n" },
             System.StringSplitOptions.None
         );
         ParseComments(lines);
