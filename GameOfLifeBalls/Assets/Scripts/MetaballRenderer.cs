@@ -24,14 +24,41 @@ public class MetaballRenderer : MonoBehaviour
 
     private bool initialized = false;
 
+    [SerializeField]
+    private bool useTexturePacking = false;
+    [SerializeField]
+    private Material materialWithTexturePacking;
+    [SerializeField]
+    private Material materialWithVectorArray;
+    private TextureEncoder textureEncoder;
+
+    [SerializeField]
+    private bool debug = false;
+
+    [SerializeField]
+    private MeshRenderer debugX;
+    [SerializeField]
+    private MeshRenderer debugY;
+
+    private float textureMultiplier = 100f;
+
     public void Initialize()
     {
+
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter = GetComponent<MeshFilter>();
-
+        if (useTexturePacking) {
+            meshRenderer.material = materialWithTexturePacking;
+        } else {
+            meshRenderer.material = materialWithVectorArray;
+        }
         metaballMaterial = meshRenderer.sharedMaterial;
-        metaballMaterial.SetVectorArray("_MetaballData", new Vector4[maxMetaBalls]);
-        metaballMaterial.SetInt("_NumberOfMetaBalls", 0);
+        if (!useTexturePacking) {
+            metaballMaterial.SetVectorArray("_MetaballData", new Vector4[maxMetaBalls]);
+        } else {
+            metaballMaterial.SetFloat("_MultiplyValue", textureMultiplier);
+        }
+        metaballMaterial.SetInt("_NumberOfMetaballs", 0);
         CreateQuadToCameraSize();
         initialized = true;
     }
@@ -43,7 +70,8 @@ public class MetaballRenderer : MonoBehaviour
 
     public void RenderMetaballs()
     {
-        if (!initialized) {
+        if (!initialized)
+        {
             Initialize();
         }
         if (cells == null)
@@ -63,7 +91,26 @@ public class MetaballRenderer : MonoBehaviour
         RenderMetaballs();
     }
 
-    private Vector4[] GetMetaBallData()
+    private List<Vector2> GetMetaballVector2Data()
+    {
+        List<Vector2> metaBallData = new List<Vector2>();
+        foreach (GOLCell cell in cells)
+        {
+            if (!cell.IsAlive)
+            {
+                continue;
+            }
+            Vector3 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
+            Debug.Log($"invPosition [x: {invPosition.x}, y:{invPosition.y}]");
+            Vector2 pos = new Vector2(invPosition.x / textureMultiplier, invPosition.y / textureMultiplier);
+            Debug.Log($"multiplied [x: {pos.x}, y:{pos.y}]");
+            metaBallData.Add(pos);
+        }
+
+        return metaBallData;
+    }
+
+    private Vector4[] GetMetaballVector4Data()
     {
         List<Vector4> metaBallData = new List<Vector4>();
         foreach (GOLCell cell in cells)
@@ -72,7 +119,7 @@ public class MetaballRenderer : MonoBehaviour
             {
                 continue;
             }
-            Vector4 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
+            Vector3 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
             Vector4 pos = new Vector4(invPosition.x, invPosition.y, MetaballRadius, 0);
             metaBallData.Add(pos);
         }
@@ -80,12 +127,38 @@ public class MetaballRenderer : MonoBehaviour
         return metaBallData.ToArray();
     }
 
+
     private void Calculate()
     {
-        Vector4[] metaBallData = GetMetaBallData();
-        metaballMaterial.SetInt("_NumberOfMetaBalls", metaBallData.Length);
-        if (metaBallData.Length > 0) {
-            metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
+        if (useTexturePacking)
+        {
+            List<Vector2> metaballData = GetMetaballVector2Data();
+            if (textureEncoder == null) {
+                textureEncoder = new TextureEncoder();
+            }
+            TextureOutput output = textureEncoder.Encode(metaballData);
+            metaballMaterial.SetInt("_NumberOfMetaballs", metaballData.Count);
+            Debug.Log($"Set metaball count: {metaballData.Count}");
+            if (metaballData.Count > 0)
+            {
+                if (debug) {
+                    debugX.material.mainTexture = output.TextureX;
+                    debugY.material.mainTexture = output.TextureY;
+                }
+                metaballMaterial.SetInt("_MetaballTextureWidth", output.Size);
+                Debug.Log($"Set texture width: {output.Size}");
+                metaballMaterial.SetTexture("_XPosTexture", output.TextureX);
+                metaballMaterial.SetTexture("_YPosTexture", output.TextureY);
+            }
+        }
+        else
+        {
+            Vector4[] metaBallData = GetMetaballVector4Data();
+            metaballMaterial.SetInt("_NumberOfMetaballs", metaBallData.Length);
+            if (metaBallData.Length > 0)
+            {
+                metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
+            }
         }
         metaballMaterial.SetFloat("_MetaballRadius", MetaballRadius * GOLCellGrid.main.Scale);
     }

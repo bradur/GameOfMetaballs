@@ -68,7 +68,7 @@ public class GOLCell : MonoBehaviour
             SetIsAlive(true);
             MetaballRenderer.main.RenderMetaballs();
         }
-        Debug.Log(Position);
+        //Debug.Log(Position);
     }
     private void OnMouseOver()
     {

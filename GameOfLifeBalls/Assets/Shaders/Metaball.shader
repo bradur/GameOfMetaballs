@@ -53,7 +53,7 @@ Shader "Custom/Metaball"
             float4 _Color;
 
             int _MetaballCount = 2;
-            int _NumberOfMetaBalls;
+            int _NumberOfMetaballs;
             float _MetaballRadius;
             float3 _MetaballData[1000];
 
@@ -63,7 +63,7 @@ Shader "Custom/Metaball"
 
                 float mx = 0;
 
-                for (int m = 0; m < _NumberOfMetaBalls; ++m)
+                for (int m = 0; m < _NumberOfMetaballs; ++m)
                 {
                     mx += pow(_MetaballRadius, 2) / (pow(i.uv.x - _MetaballData[m].x, 2) + pow(i.uv.y - _MetaballData[m].y, 2));
                 }
