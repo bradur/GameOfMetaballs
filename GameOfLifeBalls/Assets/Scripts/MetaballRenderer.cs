@@ -13,8 +13,7 @@ public class MetaballRenderer : MonoBehaviour
 
     private MeshRenderer meshRenderer;
     private MeshFilter meshFilter;
-
-    private List<GOLCell> cells;
+    private List<GameOfLifeCell> cells;
 
     private Material metaballMaterial;
 
@@ -63,7 +62,7 @@ public class MetaballRenderer : MonoBehaviour
         initialized = true;
     }
 
-    public void SetCells(List<GOLCell> newCells)
+    public void SetCells(List<GameOfLifeCell> newCells)
     {
         cells = newCells;
     }
@@ -94,16 +93,14 @@ public class MetaballRenderer : MonoBehaviour
     private List<Vector2> GetMetaballVector2Data()
     {
         List<Vector2> metaBallData = new List<Vector2>();
-        foreach (GOLCell cell in cells)
+        foreach (GameOfLifeCell cell in cells)
         {
             if (!cell.IsAlive)
             {
                 continue;
             }
-            Vector3 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
-            Debug.Log($"invPosition [x: {invPosition.x}, y:{invPosition.y}]");
+            Vector3 invPosition = transform.InverseTransformPoint(GOLCellGrid.main.GetCellPosition(cell) + ((Vector3.one) * GOLCellGrid.main.Scale / 2));
             Vector2 pos = new Vector2(invPosition.x / textureMultiplier, invPosition.y / textureMultiplier);
-            Debug.Log($"multiplied [x: {pos.x}, y:{pos.y}]");
             metaBallData.Add(pos);
         }
 
@@ -113,13 +110,13 @@ public class MetaballRenderer : MonoBehaviour
     private Vector4[] GetMetaballVector4Data()
     {
         List<Vector4> metaBallData = new List<Vector4>();
-        foreach (GOLCell cell in cells)
+        foreach (GameOfLifeCell cell in cells)
         {
             if (!cell.IsAlive)
             {
                 continue;
             }
-            Vector3 invPosition = transform.InverseTransformPoint(cell.SpriteRenderer.transform.position);
+            Vector3 invPosition = transform.InverseTransformPoint(GOLCellGrid.main.GetCellPosition(cell));
             Vector4 pos = new Vector4(invPosition.x, invPosition.y, MetaballRadius, 0);
             metaBallData.Add(pos);
         }
@@ -138,7 +135,6 @@ public class MetaballRenderer : MonoBehaviour
             }
             TextureOutput output = textureEncoder.Encode(metaballData);
             metaballMaterial.SetInt("_NumberOfMetaballs", metaballData.Count);
-            Debug.Log($"Set metaball count: {metaballData.Count}");
             if (metaballData.Count > 0)
             {
                 if (debug) {
@@ -146,7 +142,6 @@ public class MetaballRenderer : MonoBehaviour
                     debugY.material.mainTexture = output.TextureY;
                 }
                 metaballMaterial.SetInt("_MetaballTextureWidth", output.Size);
-                Debug.Log($"Set texture width: {output.Size}");
                 metaballMaterial.SetTexture("_XPosTexture", output.TextureX);
                 metaballMaterial.SetTexture("_YPosTexture", output.TextureY);
             }

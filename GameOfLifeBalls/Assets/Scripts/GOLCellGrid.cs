@@ -12,9 +12,6 @@ public class GOLCellGrid : MonoBehaviour
         main = this;
     }
 
-    [SerializeField]
-    private GOLCell golCellPrefab;
-
     private int size = 100;
 
     public int Size { get { return size; } }
@@ -22,9 +19,9 @@ public class GOLCellGrid : MonoBehaviour
     [SerializeField]
     private float sizeInWorld = 10;
 
-    private GOLCell[,] cells;
+    private GameOfLifeCell[,] cells;
 
-    public GOLCell[,] Cells { get { return cells; } }
+    public GameOfLifeCell[,] Cells { get { return cells; } }
 
     [SerializeField]
     private Color squareColor;
@@ -39,6 +36,12 @@ public class GOLCellGrid : MonoBehaviour
     private Color gridColor;
     public Color GridColor { get { return gridColor; } }
 
+    [SerializeField]
+    private Sprite tileSprite;
+
+    [SerializeField]
+    private GameOfLifeTilemapRenderer tilemapRenderer;
+
     public bool SquaresAreVisible { get; private set; }
 
     private float scale = 1f;
@@ -49,37 +52,36 @@ public class GOLCellGrid : MonoBehaviour
 
     int MAX_SIZE = 256;
 
-
     public void Initialize(int size)
     {
-        if (size > MAX_SIZE) {
+        if (size > MAX_SIZE)
+        {
             Debug.Log("Area is too big to handle!");
             return;
         }
         this.size = size;
-        cells = new GOLCell[size, size];
+        cells = new GameOfLifeCell[size, size];
         scale = sizeInWorld / size;
-        transform.position = new Vector3(-sizeInWorld / 2 + scale / 2, -sizeInWorld / 2 + scale / 2, 0f);
-        foreach(Transform child in transform) {
-            Destroy(child.gameObject);
-        }
         for (int indexX = 0; indexX < size; indexX += 1)
         {
             for (int indexY = 0; indexY < size; indexY += 1)
             {
-                GOLCell cell = Instantiate(golCellPrefab);
-                cell.Initialize(transform, new Vector2Int(indexX, indexY), scale);
+                GameOfLifeCell cell = new GameOfLifeCell(new Vector3Int(indexX, indexY, 0));
                 cells[indexX, indexY] = cell;
             }
         }
+        Debug.Log($"Creating tilemap with size: {size}");
+        tilemapRenderer.Initialize(size, tileSprite, squareColor, cells, size, size);
     }
 
-    public void Clear()
+    public void DrawCell(GameOfLifeCell cell)
     {
-        foreach (GOLCell cell in cells)
-        {
-            cell.SetIsAlive(false);
-        }
+        tilemapRenderer.DrawTile(cell);
+    }
+
+    public Vector3 GetCellPosition(GameOfLifeCell cell)
+    {
+        return tilemapRenderer.GetCellWorldPosition(cell);
     }
 
     public bool LoadPattern(string pattern)
@@ -89,7 +91,8 @@ public class GOLCellGrid : MonoBehaviour
         int bufferZoneSize = 10;
         int patternSize = System.Math.Max(rlePattern.Height, rlePattern.Width);
         int requiredSize = patternSize + bufferZoneSize * 2;
-        if (requiredSize > MAX_SIZE) {
+        if (requiredSize > MAX_SIZE)
+        {
             Debug.Log("Pattern is too big!");
             return false;
         }
@@ -107,7 +110,6 @@ public class GOLCellGrid : MonoBehaviour
         else if (rlePattern.Width > rlePattern.Height)
         {
             originalYPos -= patternSize / 2 - rlePattern.Height / 2;
-            Debug.Log(originalYPos);
         }
 
         int xPos = originalXPos;
@@ -142,25 +144,21 @@ public class GOLCellGrid : MonoBehaviour
         {
             return;
         }
-        foreach (GOLCell cell in cells)
-        {
-            cell.ToggleGrid();
-        }
     }
     public void ToggleSquares()
     {
         SquaresAreVisible = !SquaresAreVisible;
-        if (cells == null)
+        if (SquaresAreVisible)
         {
-            return;
+            tilemapRenderer.Enable();
         }
-        foreach (GOLCell cell in cells)
+        else
         {
-            cell.ToggleSquares();
+            tilemapRenderer.Disable();
         }
     }
 
-    public int GetLivingNeighborCount(GOLCell cell)
+    public int GetLivingNeighborCount(GameOfLifeCell cell)
     {
         int livingNeighborCount = 0;
 
@@ -172,7 +170,7 @@ public class GOLCellGrid : MonoBehaviour
                 {
                     continue;
                 }
-                GOLCell neighbor = GetNeighbor(cell.Position, xPos, yPos);
+                GameOfLifeCell neighbor = GetNeighbor(cell.Position, xPos, yPos);
                 if (neighbor != null)
                 {
                     if (neighbor.IsAlive)
@@ -186,7 +184,7 @@ public class GOLCellGrid : MonoBehaviour
         return livingNeighborCount;
     }
 
-    private GOLCell GetNeighbor(Vector2Int position, int xCoordinate, int yCoordinate)
+    private GameOfLifeCell GetNeighbor(Vector3Int position, int xCoordinate, int yCoordinate)
     {
         int xPos = position.x + xCoordinate;
         int yPos = position.y + yCoordinate;

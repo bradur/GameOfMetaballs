@@ -80,20 +80,18 @@ public class GameOfLife : MonoBehaviour
     {
         float maxInterval = 0.5f;
         updateInterval = maxInterval - (maxInterval * value);
-        Debug.Log($"Speed set at {updateInterval}");
     }
 
     private void InitializeMetaballRenderer()
     {
-        List<GOLCell> cellList = new List<GOLCell>();
-        foreach (GOLCell cell in grid.Cells)
+        List<GameOfLifeCell> cellList = new List<GameOfLifeCell>();
+        foreach (GameOfLifeCell cell in grid.Cells)
         {
             cellList.Add(cell);
         }
 
         MetaballRenderer.main.SetCells(cellList);
     }
-
 
     private void UpdateCells()
     {
@@ -102,19 +100,19 @@ public class GameOfLife : MonoBehaviour
         {
             for (int indexY = 0; indexY < size; indexY += 1)
             {
-                GOLCell cell = grid.Cells[indexX, indexY];
+                GameOfLifeCell cell = grid.Cells[indexX, indexY];
                 int livingNeighborCount = grid.GetLivingNeighborCount(cell);
 
                 bool cellAlive = DetermineRuleResult(livingNeighborCount, cell.IsAlive);
                 cell.NextState = cellAlive;
             }
         }
-        foreach (GOLCell cell in grid.Cells)
+        foreach (GameOfLifeCell cell in grid.Cells)
         {
             cell.SetIsAlive(cell.NextState);
+            grid.DrawCell(cell);
         }
     }
-
 
     private bool DetermineRuleResult(int livingNeighborCount, bool cellIsAlive)
     {
