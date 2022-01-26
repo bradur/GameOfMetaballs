@@ -155,6 +155,7 @@ public class MetaballRenderer : MonoBehaviour
                 metaballMaterial.SetVectorArray("_MetaballData", metaBallData);
             }
         }
+
         metaballMaterial.SetFloat("_MetaballRadius", MetaballRadius * GOLCellGrid.main.Scale);
     }
 

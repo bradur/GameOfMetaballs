@@ -40,6 +40,7 @@ public class GameOfLife : MonoBehaviour
         if (!success) {
             return;
         }
+        GameOfLifeTilemapRenderer.main.UpdateScale(GOLCellGrid.main.Size);
         InitializeMetaballRenderer();
         MetaballRenderer.main.RenderMetaballs();
     }
@@ -78,8 +79,9 @@ public class GameOfLife : MonoBehaviour
 
     public void SetSpeed(float value)
     {
-        float maxInterval = 0.5f;
+        float maxInterval = 0.25f;
         updateInterval = maxInterval - (maxInterval * value);
+        Debug.Log($"Speed set to {updateInterval}");
     }
 
     private void InitializeMetaballRenderer()
