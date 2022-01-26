@@ -21,13 +21,13 @@ public class UIToggleGridButton : MonoBehaviour
 
     public void Toggle()
     {
-        GOLCellGrid.main.ToggleGrid();
+        GameOfLifeTilemapRenderer.main.ToggleGrid();
         UpdateButton();
     }
 
     public void UpdateButton()
     {
-        txtTitle.text = GOLCellGrid.main.GridIsOn ? "Grid: <color=green>ON</color>" : "Grid: <color=red>OFF</color>";
-        imgBg.color = GOLCellGrid.main.GridIsOn ? isOnColor : isOffColor;
+        txtTitle.text = GameOfLifeTilemapRenderer.main.GridIsOn ? "Grid: <color=green>ON</color>" : "Grid: <color=red>OFF</color>";
+        imgBg.color = GameOfLifeTilemapRenderer.main.GridIsOn ? isOnColor : isOffColor;
     }
 }

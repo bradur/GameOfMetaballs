@@ -48,8 +48,6 @@ public class GOLCellGrid : MonoBehaviour
 
     public float Scale { get { return scale; } }
 
-    public bool GridIsOn { get; private set; }
-
     int MAX_SIZE = 256;
 
     public void Initialize(int size)
@@ -77,6 +75,10 @@ public class GOLCellGrid : MonoBehaviour
     public void DrawCell(GameOfLifeCell cell)
     {
         tilemapRenderer.DrawTile(cell);
+    }
+
+    public void RefreshTiles() {
+        tilemapRenderer.RefreshTiles();
     }
 
     public Vector3 GetCellPosition(GameOfLifeCell cell)
@@ -137,14 +139,6 @@ public class GOLCellGrid : MonoBehaviour
         return true;
     }
 
-    public void ToggleGrid()
-    {
-        GridIsOn = !GridIsOn;
-        if (cells == null)
-        {
-            return;
-        }
-    }
     public void ToggleSquares()
     {
         SquaresAreVisible = !SquaresAreVisible;

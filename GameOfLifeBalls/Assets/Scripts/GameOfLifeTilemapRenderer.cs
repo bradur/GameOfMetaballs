@@ -31,11 +31,14 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
     private int width;
     private int height;
 
-    private Vector3 offset;
     private int size;
 
+    [SerializeField]
+    private SpriteRenderer gridRenderer;
 
     private TilemapRenderer tilemapRenderer;
+
+    public bool GridIsOn { get; private set; }
 
     public void Initialize(int size, Sprite tileSprite, Color spriteColor, GameOfLifeCell[,] cells, int width, int height)
     {
@@ -48,6 +51,7 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
         UpdateScale(size);
         transform.position = new Vector3(-sizeInWorld / 2, -sizeInWorld / 2, 0f);
         tilemapRenderer.enabled = GOLCellGrid.main.SquaresAreVisible;
+        gridRenderer.enabled = GridIsOn;
     }
 
     public void Enable() {
@@ -63,6 +67,9 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
     public void UpdateScale(float size)
     {
         scale = sizeInWorld / size;
+        float gridSize = size / 8f;
+        gridRenderer.size = new Vector2(gridSize, gridSize);
+        gridRenderer.transform.localScale = new Vector3(10f / gridSize, 10f / gridSize, 1f);
         boxCollider2D.size = new Vector2(sizeInWorld, sizeInWorld);
         grid.transform.localScale = new Vector3(scale, scale, 1f);
         highlightSprite.transform.localScale = new Vector3(scale, scale, 1f);
@@ -74,11 +81,12 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
     {
         if (cell.PreviousState != cell.IsAlive)
         {
-            Vector3Int pos = new Vector3Int(cell.Position.x, cell.Position.y, 0);
-            tilemap.SetTile(pos, cell.IsAlive ? basicTile : null);
-            tilemap.RefreshTile(pos);
-            MetaballRenderer.main.RenderMetaballs();
+            tilemap.SetTile(cell.Position, cell.IsAlive ? basicTile : null);
         }
+    }
+
+    public void RefreshTiles() {
+        tilemap.RefreshAllTiles();
     }
 
     private Tile CreateTile(Color color, Sprite sprite)
@@ -106,6 +114,12 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
         }
         tilemap.SetTiles(positions, tiles);
         tilemap.RefreshAllTiles();
+    }
+
+    public void ToggleGrid()
+    {
+        GridIsOn = !GridIsOn;
+        gridRenderer.enabled = GridIsOn;
     }
 
     public Vector3 GetCellWorldPosition(GameOfLifeCell cell) {
@@ -140,6 +154,8 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
             }
             cell.SetIsAlive(true);
             DrawTile(cell);
+            tilemap.RefreshTile(cell.Position);
+            MetaballRenderer.main.RenderMetaballs();
         }
         else if (Input.GetMouseButton(1))
         {
@@ -154,6 +170,8 @@ public class GameOfLifeTilemapRenderer : MonoBehaviour
             }
             cell.SetIsAlive(false);
             DrawTile(cell);
+            tilemap.RefreshTile(cell.Position);
+            MetaballRenderer.main.RenderMetaballs();
         }
         if (GameOfLife.main.DrawingPausesIsOn && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
             GameOfLife.main.ResumeGame();

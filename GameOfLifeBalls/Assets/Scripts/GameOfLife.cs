@@ -112,6 +112,8 @@ public class GameOfLife : MonoBehaviour
             cell.SetIsAlive(cell.NextState);
             grid.DrawCell(cell);
         }
+        grid.RefreshTiles();
+        MetaballRenderer.main.RenderMetaballs();
     }
 
     private bool DetermineRuleResult(int livingNeighborCount, bool cellIsAlive)

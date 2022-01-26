@@ -45,7 +45,6 @@ public class TextureEncoder
 
         if (data.Count < 1)
         {
-            Debug.Log("Not inserting any data as there is no data...");
             return;
         }
 
